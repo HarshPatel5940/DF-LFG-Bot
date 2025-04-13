@@ -1,0 +1,39 @@
+services:
+  dow-bot:
+    image: harshnpatel/dow-bot:latest
+    container_name: DOW-Bot
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URI: mongodb://root:password@DOW-Bot-Mongo:27017/DOWbot
+    depends_on:
+      - mongo
+    networks:
+      - DOW-Bot-Network
+
+  mongo:
+    image: mongo:latest
+    container_name: DOW-Bot-Mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: DOWbot
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    networks:
+      - DOW-Bot-Network
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+
+networks:
+  DOW-Bot-Network:
+    driver: bridge
