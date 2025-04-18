@@ -22,10 +22,10 @@ export async function initDbCollections() {
   }
 
   const collections = await db.collections();
-  const myCollections = ["users", "matches", "leagues"];
+  const myCollections = ["templates", "lfg", "lfgConfigs"];
 
   for (const collection of myCollections) {
-    if (!collections.map(c => c.collectionName).includes(collection)) {
+    if (!collections.map((c) => c.collectionName).includes(collection)) {
       await db.createCollection(collection);
       console.log(`Database ${collection} Collections Created!`);
     }

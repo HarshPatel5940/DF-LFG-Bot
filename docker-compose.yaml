@@ -1,20 +1,20 @@
 services:
-  dow-bot:
-    image: harshnpatel/dow-bot:latest
-    container_name: DOW-Bot
+  df-lfg-bot:
+    image: harshnpatel/df-lfg-bot:latest
+    container_name: df-lfg-bot
     restart: always
     ports:
       - "3000:3000"
     environment:
-      MONGO_URI: mongodb://root:password@DOW-Bot-Mongo:27017/DOWbot
+      MONGO_URI: mongodb://root:password@df-lfg-bot-Mongo:27017/DOWbot
     depends_on:
       - mongo
     networks:
-      - DOW-Bot-Network
+      - df-lfg-bot-Network
 
   mongo:
     image: mongo:latest
-    container_name: DOW-Bot-Mongo
+    container_name: df-lfg-bot-Mongo
     restart: always
     ports:
       - "27017:27017"
@@ -26,7 +26,7 @@ services:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
     networks:
-      - DOW-Bot-Network
+      - df-lfg-bot-Network
 
 volumes:
   mongo-data:
@@ -35,5 +35,5 @@ volumes:
     driver: local
 
 networks:
-  DOW-Bot-Network:
+  df-lfg-bot-Network:
     driver: bridge

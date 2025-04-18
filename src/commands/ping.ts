@@ -10,10 +10,10 @@ export default {
   async execute(interaction) {
     const message = await interaction.reply({
       content: "Pong!",
-      fetchReply: true,
+      withResponse: true,
     });
     await interaction.editReply(
-      `Pong! Latency is ${Math.abs(Date.now() - message.createdTimestamp)}ms.`,
+      `Pong! Latency is ${Math.abs(Date.now() - message.interaction.createdTimestamp)}ms.`,
     );
   },
 } as Command;
