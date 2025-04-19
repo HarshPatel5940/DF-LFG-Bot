@@ -7,4 +7,4 @@ export const LFGConfigSchema = z.object({
   pingRoleId: z.string().optional().nullable(),
 });
 
-export type LFGConfig = z.infer<typeof LFGConfigSchema>;
+export type LFGConfigType = z.infer<typeof LFGConfigSchema>;

@@ -20,17 +20,12 @@ async function initialiseBot() {
     await initDbCollections();
     await registerSlashCommands();
 
-    // Initialize LFG service
-    LFGService.instance; // This will initialize the singleton
+    LFGService.instance;
 
-    // Register the event handler with the client parameter
-    client.on(Events.InteractionCreate, async (interaction) => {
+    client.on(Events.InteractionCreate, async interaction => {
       try {
-        // For LFG interactions
         const lfgHandler = require("./events/handleLFGInteractions").default;
         await lfgHandler.execute(interaction, client);
-
-        // Your existing interaction code...
       } catch (error) {
         console.error("Error handling interaction:", error);
       }

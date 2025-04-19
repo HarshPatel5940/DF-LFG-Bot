@@ -1,8 +1,8 @@
 import {
   ChannelType,
-  SlashCommandBuilder,
-  PermissionFlagsBits,
   type ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
 } from "discord.js";
 import type { Command } from "../interface";
 import { LFGService } from "../services/lfgService";
@@ -14,25 +14,25 @@ export default {
     .setDescription("Configure the LFG system for your server")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .setDMPermission(false)
-    .addChannelOption((option) =>
+    .addChannelOption(option =>
       option
         .setName("announcement-channel")
         .setDescription("Channel where LFG announcements will be posted")
         .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-        .setRequired(true)
+        .setRequired(true),
     )
-    .addChannelOption((option) =>
+    .addChannelOption(option =>
       option
         .setName("voice-category")
         .setDescription("Category where LFG voice channels will be created")
         .addChannelTypes(ChannelType.GuildCategory)
-        .setRequired(true)
+        .setRequired(true),
     )
-    .addRoleOption((option) =>
+    .addRoleOption(option =>
       option
         .setName("ping-role")
         .setDescription("Role to ping for LFG announcements (optional)")
-        .setRequired(false)
+        .setRequired(false),
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
@@ -45,11 +45,11 @@ export default {
 
     const announcementChannel = interaction.options.getChannel(
       "announcement-channel",
-      true
+      true,
     );
     const voiceCategory = interaction.options.getChannel(
       "voice-category",
-      true
+      true,
     );
     const pingRole = interaction.options.getRole("ping-role");
 

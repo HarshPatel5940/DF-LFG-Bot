@@ -1,8 +1,8 @@
 import {
+  type Client,
   type Collection,
   Events,
   type Interaction,
-  type Client,
 } from "discord.js";
 import type { Command } from "../interface";
 import handleLFGInteractions from "./handleLFGInteractions";
@@ -14,22 +14,20 @@ export default {
   async execute(
     interaction: Interaction,
     commands: Collection<string, Command>,
-    client: Client // Properly typed as Client
+    client: Client,
   ) {
     try {
-      // First, check if this is an LFG-related interaction
       if (
         (interaction.isButton() && interaction.customId.startsWith("lfg-")) ||
         (interaction.isStringSelectMenu() &&
           interaction.customId.startsWith("lfg-"))
       ) {
         console.log(
-          `[LFG DEBUG] Delegating interaction to LFG handler: ${interaction.id}`
+          `[LFG DEBUG] Delegating interaction to LFG handler: ${interaction.id}`,
         );
         return await handleLFGInteractions.execute(interaction, client);
       }
 
-      // Handle commands
       if (interaction.isChatInputCommand()) {
         const command = commands.get(interaction.commandName);
         if (!command) {

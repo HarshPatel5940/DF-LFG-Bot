@@ -1,31 +1,31 @@
 import {
   ActionRowBuilder,
+  type ChatInputCommandInteraction,
   SlashCommandBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  type ChatInputCommandInteraction,
 } from "discord.js";
+import type { Command } from "../interface";
 import { LFGService } from "../services/lfgService";
 import { DifficultySchema, MapSchema, RankedStatusSchema } from "../types/lfg";
-import type { Command } from "../interface";
 
 export default {
   data: new SlashCommandBuilder()
     .setName("lfg")
     .setDescription("Manage Looking For Group requests")
-    .addSubcommand((subcommand) =>
-      subcommand.setName("create").setDescription("Create a new LFG request")
+    .addSubcommand(subcommand =>
+      subcommand.setName("create").setDescription("Create a new LFG request"),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("close")
-        .setDescription("Close your active LFG request")
+        .setDescription("Close your active LFG request"),
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
     try {
       console.log(
-        `[LFG DEBUG] Executing LFG command: ${interaction.options.getSubcommand()}`
+        `[LFG DEBUG] Executing LFG command: ${interaction.options.getSubcommand()}`,
       );
 
       if (interaction.options.getSubcommand() === "create") {
@@ -45,7 +45,7 @@ export default {
 
         const activeLFGs = await lfgService.getLFGsByOwnerId(
           interaction.guildId,
-          interaction.user.id
+          interaction.user.id,
         );
 
         if (activeLFGs.length > 0) {
@@ -71,8 +71,8 @@ export default {
           return;
         }
 
-        const mapOptions = MapSchema.options.map((map) =>
-          new StringSelectMenuOptionBuilder().setLabel(map).setValue(map)
+        const mapOptions = MapSchema.options.map(map =>
+          new StringSelectMenuOptionBuilder().setLabel(map).setValue(map),
         );
         const mapSelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-map-select")
@@ -80,13 +80,13 @@ export default {
           .addOptions(mapOptions);
         const mapRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            mapSelectMenu
+            mapSelectMenu,
           );
 
-        const difficultyOptions = DifficultySchema.options.map((difficulty) =>
+        const difficultyOptions = DifficultySchema.options.map(difficulty =>
           new StringSelectMenuOptionBuilder()
             .setLabel(difficulty)
-            .setValue(difficulty)
+            .setValue(difficulty),
         );
         const difficultySelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-difficulty-select")
@@ -94,11 +94,11 @@ export default {
           .addOptions(difficultyOptions);
         const difficultyRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            difficultySelectMenu
+            difficultySelectMenu,
           );
 
-        const rankedOptions = RankedStatusSchema.options.map((status) =>
-          new StringSelectMenuOptionBuilder().setLabel(status).setValue(status)
+        const rankedOptions = RankedStatusSchema.options.map(status =>
+          new StringSelectMenuOptionBuilder().setLabel(status).setValue(status),
         );
         const rankedSelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-ranked-select")
@@ -106,7 +106,7 @@ export default {
           .addOptions(rankedOptions);
         const rankedRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            rankedSelectMenu
+            rankedSelectMenu,
           );
 
         try {
@@ -115,12 +115,12 @@ export default {
             components: [mapRow, difficultyRow, rankedRow],
           });
           console.log(
-            "[LFG DEBUG] Successfully sent first 3 selection menus to user"
+            "[LFG DEBUG] Successfully sent first 3 selection menus to user",
           );
         } catch (err) {
           console.error(
             "[LFG ERROR] Failed to send initial selection menus:",
-            err
+            err,
           );
 
           if (!interaction.replied && !interaction.deferred) {
@@ -154,7 +154,7 @@ export default {
 
         const activeLFGs = await lfgService.getLFGsByOwnerId(
           interaction.guildId,
-          interaction.user.id
+          interaction.user.id,
         );
 
         if (activeLFGs.length === 0) {
