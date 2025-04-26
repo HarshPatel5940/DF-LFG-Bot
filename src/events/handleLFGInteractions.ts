@@ -27,6 +27,7 @@ import {
   type LFGSchema,
   LoadoutTypeSchema,
   type LoadoutTypeType,
+  MAP_AVAILABILITY,
   MapSchema,
   type MapType,
   ObjectiveTypeSchema,
@@ -174,12 +175,37 @@ async function updateLFGCreateMessage(
     if (!firstStepComplete) {
       content = `Step 1/2: Select Map, Difficulty, and Ranked Status.${selectionsSummary}`;
 
-      const mapOptions = MapSchema.options.map((opt) =>
-        new StringSelectMenuOptionBuilder()
+      const currentHour = new Date().getUTCHours();
+
+      const availableMaps = MapSchema.options.filter((mapName) => {
+        if (difficulty) {
+          return MAP_AVAILABILITY.some(
+            (m) =>
+              m.map === mapName &&
+              m.difficulty === difficulty &&
+              (m.isPermanent || m.rotationHours?.includes(currentHour))
+          );
+        }
+
+        return MAP_AVAILABILITY.some(
+          (m) =>
+            m.map === mapName &&
+            (m.isPermanent || m.rotationHours?.includes(currentHour))
+        );
+      });
+
+      const mapOptions = availableMaps.map((opt) => {
+        const isPermanent = MAP_AVAILABILITY.some(
+          (m) => m.map === opt && m.isPermanent
+        );
+
+        return new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(map === opt)
-      );
+          .setDescription(isPermanent ? "Permanent Map" : "Rotating Map")
+          .setDefault(map === opt);
+      });
+
       const mapSelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-map-select")
         .setPlaceholder(map ? `Selected: ${map}` : "Select a map")
@@ -190,7 +216,22 @@ async function updateLFGCreateMessage(
         )
       );
 
-      const difficultyOptions = DifficultySchema.options.map((opt) =>
+      const availableDifficulties = DifficultySchema.options.filter(
+        (diffName) => {
+          if (map) {
+            return MAP_AVAILABILITY.some(
+              (m) =>
+                m.map === map &&
+                m.difficulty === diffName &&
+                (m.isPermanent || m.rotationHours?.includes(currentHour))
+            );
+          }
+
+          return true;
+        }
+      );
+
+      const difficultyOptions = availableDifficulties.map((opt) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
@@ -468,13 +509,6 @@ async function handleConfirmCreateLFG(
     });
   } catch (error) {
     console.error("Error creating LFG:", error);
-    await interaction
-      .followUp({
-        content:
-          "❌ An error occurred while creating your LFG request. Please try again.",
-        ephemeral: true,
-      })
-      .catch(console.error);
   }
 }
 

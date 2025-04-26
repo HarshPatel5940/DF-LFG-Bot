@@ -7,25 +7,35 @@ import {
 } from "discord.js";
 import type { Command } from "../interface";
 import { LFGService } from "../services/lfgService";
-import { DifficultySchema, MapSchema, RankedStatusSchema } from "../types/lfg";
+import {
+  DifficultySchema,
+  MAP_AVAILABILITY,
+  MapSchema,
+  RankedStatusSchema,
+} from "../types/lfg";
 
 export default {
   data: new SlashCommandBuilder()
     .setName("lfg")
     .setDescription("Manage Looking For Group requests")
-    .addSubcommand(subcommand =>
-      subcommand.setName("create").setDescription("Create a new LFG request"),
+    .addSubcommand((subcommand) =>
+      subcommand.setName("create").setDescription("Create a new LFG request")
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("close")
-        .setDescription("Close your active LFG request"),
+        .setDescription("Close your active LFG request")
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("rotation")
+        .setDescription("View current map rotation information")
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
     try {
       console.log(
-        `[LFG DEBUG] Executing LFG command: ${interaction.options.getSubcommand()}`,
+        `[LFG DEBUG] Executing LFG command: ${interaction.options.getSubcommand()}`
       );
 
       if (interaction.options.getSubcommand() === "create") {
@@ -45,7 +55,7 @@ export default {
 
         const activeLFGs = await lfgService.getLFGsByOwnerId(
           interaction.guildId,
-          interaction.user.id,
+          interaction.user.id
         );
 
         if (activeLFGs.length > 0) {
@@ -71,22 +81,40 @@ export default {
           return;
         }
 
-        const mapOptions = MapSchema.options.map(map =>
-          new StringSelectMenuOptionBuilder().setLabel(map).setValue(map),
+        const currentHour = new Date().getUTCHours();
+
+        const availableMaps = MapSchema.options.filter((mapName) =>
+          MAP_AVAILABILITY.some(
+            (m) =>
+              m.map === mapName &&
+              (m.isPermanent || m.rotationHours?.includes(currentHour))
+          )
         );
+
+        const mapOptions = availableMaps.map((map) => {
+          const isPermanent = MAP_AVAILABILITY.some(
+            (m) => m.map === map && m.isPermanent
+          );
+
+          return new StringSelectMenuOptionBuilder()
+            .setLabel(map)
+            .setValue(map)
+            .setDescription(isPermanent ? "Permanent Map" : "Rotating Map");
+        });
+
         const mapSelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-map-select")
           .setPlaceholder("Select a map")
           .addOptions(mapOptions);
         const mapRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            mapSelectMenu,
+            mapSelectMenu
           );
 
-        const difficultyOptions = DifficultySchema.options.map(difficulty =>
+        const difficultyOptions = DifficultySchema.options.map((difficulty) =>
           new StringSelectMenuOptionBuilder()
             .setLabel(difficulty)
-            .setValue(difficulty),
+            .setValue(difficulty)
         );
         const difficultySelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-difficulty-select")
@@ -94,11 +122,11 @@ export default {
           .addOptions(difficultyOptions);
         const difficultyRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            difficultySelectMenu,
+            difficultySelectMenu
           );
 
-        const rankedOptions = RankedStatusSchema.options.map(status =>
-          new StringSelectMenuOptionBuilder().setLabel(status).setValue(status),
+        const rankedOptions = RankedStatusSchema.options.map((status) =>
+          new StringSelectMenuOptionBuilder().setLabel(status).setValue(status)
         );
         const rankedSelectMenu = new StringSelectMenuBuilder()
           .setCustomId("lfg-ranked-select")
@@ -106,7 +134,7 @@ export default {
           .addOptions(rankedOptions);
         const rankedRow =
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            rankedSelectMenu,
+            rankedSelectMenu
           );
 
         try {
@@ -115,12 +143,12 @@ export default {
             components: [mapRow, difficultyRow, rankedRow],
           });
           console.log(
-            "[LFG DEBUG] Successfully sent first 3 selection menus to user",
+            "[LFG DEBUG] Successfully sent first 3 selection menus to user"
           );
         } catch (err) {
           console.error(
             "[LFG ERROR] Failed to send initial selection menus:",
-            err,
+            err
           );
 
           if (!interaction.replied && !interaction.deferred) {
@@ -137,6 +165,39 @@ export default {
             });
           }
         }
+      } else if (interaction.options.getSubcommand() === "rotation") {
+        const currentHour = new Date().getUTCHours();
+        const nextHour = (currentHour + 1) % 24;
+
+        const currentMaps = MAP_AVAILABILITY.filter(
+          (m) => m.isPermanent || m.rotationHours?.includes(currentHour)
+        ).map(
+          (m) =>
+            `- ${m.map} (${m.difficulty})${m.isPermanent ? " (Permanent)" : ""}`
+        );
+
+        const nextMaps = MAP_AVAILABILITY.filter(
+          (m) => m.isPermanent || m.rotationHours?.includes(nextHour)
+        )
+          .filter((m) => !m.isPermanent)
+          .map((m) => `- ${m.map} (${m.difficulty})`);
+
+        const rotationInfo = [
+          `**Current UTC time:** ${currentHour}:00-${nextHour}:00`,
+          "",
+          "**Currently Available Maps:**",
+          ...currentMaps,
+          "",
+          "**Coming Up Next Hour:**",
+          nextMaps.length > 0
+            ? nextMaps.join("\n")
+            : "No rotation changes next hour",
+        ].join("\n");
+
+        await interaction.reply({
+          content: rotationInfo,
+          ephemeral: true,
+        });
       } else if (interaction.options.getSubcommand() === "close") {
         if (!interaction.deferred) {
           await interaction.deferReply({ ephemeral: true });
@@ -154,7 +215,7 @@ export default {
 
         const activeLFGs = await lfgService.getLFGsByOwnerId(
           interaction.guildId,
-          interaction.user.id,
+          interaction.user.id
         );
 
         if (activeLFGs.length === 0) {
