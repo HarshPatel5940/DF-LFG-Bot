@@ -46,12 +46,7 @@ export default {
     if (!interaction.guild) return;
 
     if (interaction.isButton()) {
-      if (interaction.customId.startsWith("lfg-close-existing-")) {
-        await handleCloseExistingLFG(
-          interaction,
-          interaction.customId.replace("lfg-close-existing-", "")
-        );
-      } else if (interaction.customId === "lfg-cancel-creation") {
+      if (interaction.customId === "lfg-cancel-creation") {
         userSelections.delete(interaction.user.id);
         await interaction.update({
           content: "LFG creation cancelled.",
@@ -61,7 +56,7 @@ export default {
         await handleCloseConfirmLFG(
           interaction,
           interaction.customId.replace("lfg-close-confirm-", ""),
-          client
+          client,
         );
       } else if (interaction.customId === "lfg-close-cancel") {
         await interaction.update({
@@ -118,7 +113,7 @@ export default {
             break;
           case "lfg-classes-select":
             userSelection.neededClasses = interaction.values.filter((cls) =>
-              (ClassTypeSchema.options as ReadonlyArray<string>).includes(cls)
+              (ClassTypeSchema.options as ReadonlyArray<string>).includes(cls),
             ) as ClassTypeType[];
             updated = true;
             break;
@@ -135,7 +130,7 @@ export default {
 
 async function updateLFGCreateMessage(
   interaction: StringSelectMenuInteraction,
-  userSelection: Partial<LFGCreateParams>
+  userSelection: Partial<LFGCreateParams>,
 ) {
   try {
     const {
@@ -183,20 +178,20 @@ async function updateLFGCreateMessage(
             (m) =>
               m.map === mapName &&
               m.difficulty === difficulty &&
-              (m.isPermanent || m.rotationHours?.includes(currentHour))
+              (m.isPermanent || m.rotationHours?.includes(currentHour)),
           );
         }
 
         return MAP_AVAILABILITY.some(
           (m) =>
             m.map === mapName &&
-            (m.isPermanent || m.rotationHours?.includes(currentHour))
+            (m.isPermanent || m.rotationHours?.includes(currentHour)),
         );
       });
 
       const mapOptions = availableMaps.map((opt) => {
         const isPermanent = MAP_AVAILABILITY.some(
-          (m) => m.map === opt && m.isPermanent
+          (m) => m.map === opt && m.isPermanent,
         );
 
         return new StringSelectMenuOptionBuilder()
@@ -212,8 +207,8 @@ async function updateLFGCreateMessage(
         .addOptions(mapOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          mapSelectMenu
-        )
+          mapSelectMenu,
+        ),
       );
 
       const availableDifficulties = DifficultySchema.options.filter(
@@ -223,48 +218,48 @@ async function updateLFGCreateMessage(
               (m) =>
                 m.map === map &&
                 m.difficulty === diffName &&
-                (m.isPermanent || m.rotationHours?.includes(currentHour))
+                (m.isPermanent || m.rotationHours?.includes(currentHour)),
             );
           }
 
           return true;
-        }
+        },
       );
 
       const difficultyOptions = availableDifficulties.map((opt) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(difficulty === opt)
+          .setDefault(difficulty === opt),
       );
       const difficultySelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-difficulty-select")
         .setPlaceholder(
-          difficulty ? `Selected: ${difficulty}` : "Select difficulty"
+          difficulty ? `Selected: ${difficulty}` : "Select difficulty",
         )
         .addOptions(difficultyOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          difficultySelectMenu
-        )
+          difficultySelectMenu,
+        ),
       );
 
       const rankedOptions = RankedStatusSchema.options.map((opt) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(rankedStatus === opt)
+          .setDefault(rankedStatus === opt),
       );
       const rankedSelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-ranked-select")
         .setPlaceholder(
-          rankedStatus ? `Selected: ${rankedStatus}` : "Select ranked status"
+          rankedStatus ? `Selected: ${rankedStatus}` : "Select ranked status",
         )
         .addOptions(rankedOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          rankedSelectMenu
-        )
+          rankedSelectMenu,
+        ),
       );
     } else {
       content = `Step 2/2: Select Objective, Loadout, and optionally Needed Classes.${selectionsSummary}`;
@@ -273,58 +268,60 @@ async function updateLFGCreateMessage(
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(objectiveType === opt)
+          .setDefault(objectiveType === opt),
       );
       const objectiveSelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-objective-select")
         .setPlaceholder(
-          objectiveType ? `Selected: ${objectiveType}` : "Select objective type"
+          objectiveType
+            ? `Selected: ${objectiveType}`
+            : "Select objective type",
         )
         .addOptions(objectiveOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          objectiveSelectMenu
-        )
+          objectiveSelectMenu,
+        ),
       );
 
       const loadoutOptions = LoadoutTypeSchema.options.map((opt) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(loadoutType === opt)
+          .setDefault(loadoutType === opt),
       );
       const loadoutSelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-loadout-select")
         .setPlaceholder(
-          loadoutType ? `Selected: ${loadoutType}` : "Select loadout type"
+          loadoutType ? `Selected: ${loadoutType}` : "Select loadout type",
         )
         .addOptions(loadoutOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          loadoutSelectMenu
-        )
+          loadoutSelectMenu,
+        ),
       );
 
       const classOptions = ClassTypeSchema.options.map((opt) =>
         new StringSelectMenuOptionBuilder()
           .setLabel(opt)
           .setValue(opt)
-          .setDefault(neededClasses?.includes(opt) ?? false)
+          .setDefault(neededClasses?.includes(opt) ?? false),
       );
       const classSelectMenu = new StringSelectMenuBuilder()
         .setCustomId("lfg-classes-select")
         .setPlaceholder(
           neededClasses && neededClasses.length > 0
             ? `Selected: ${neededClasses.join(", ")}`
-            : "Select needed classes (up to 2)"
+            : "Select needed classes (up to 2)",
         )
         .setMinValues(0)
         .setMaxValues(2)
         .addOptions(classOptions);
       components.push(
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-          classSelectMenu
-        )
+          classSelectMenu,
+        ),
       );
 
       if (allRequiredSelected) {
@@ -338,7 +335,7 @@ async function updateLFGCreateMessage(
             new ButtonBuilder()
               .setCustomId("lfg-create-cancel")
               .setLabel("Cancel")
-              .setStyle(ButtonStyle.Danger)
+              .setStyle(ButtonStyle.Danger),
           );
         components.push(confirmButtons);
       }
@@ -346,7 +343,7 @@ async function updateLFGCreateMessage(
 
     if (components.length > 5) {
       console.error(
-        "[LFG ERROR] Attempted to send more than 5 action rows. This should not happen."
+        "[LFG ERROR] Attempted to send more than 5 action rows. This should not happen.",
       );
     }
 
@@ -361,7 +358,7 @@ async function updateLFGCreateMessage(
         err.code === 10062)
     ) {
       console.log(
-        `[LFG DEBUG] Interaction already acknowledged (Code: ${err.code}). Likely double-click or race condition.`
+        `[LFG DEBUG] Interaction already acknowledged (Code: ${err.code}). Likely double-click or race condition.`,
       );
     } else {
       console.error("Error updating LFG create message:", err);
@@ -386,7 +383,7 @@ async function updateLFGCreateMessage(
 
 async function handleConfirmCreateLFG(
   interaction: ButtonInteraction,
-  client: Client
+  client: Client,
 ) {
   if (!interaction.guildId || !interaction.guild) {
     const replyMethod =
@@ -464,7 +461,7 @@ async function handleConfirmCreateLFG(
           RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged
       ) {
         console.log(
-          "[LFG Confirm] Interaction already acknowledged before update, proceeding."
+          "[LFG Confirm] Interaction already acknowledged before update, proceeding.",
         );
       } else {
         throw updateError;
@@ -475,14 +472,14 @@ async function handleConfirmCreateLFG(
       interaction.guildId,
       interaction.user.id,
       interaction.user.tag,
-      selections as LFGCreateParams
+      selections as LFGCreateParams,
     );
 
     const voiceChannel = await createVoiceChannel(
       interaction,
       lfg,
       client,
-      config.voiceCategoryId
+      config.voiceCategoryId,
     );
 
     if (voiceChannel) {
@@ -495,7 +492,7 @@ async function handleConfirmCreateLFG(
       lfg,
       client,
       config.announcementChannelId,
-      config.pingRoleId
+      config.pingRoleId,
     );
 
     userSelections.delete(interaction.user.id);
@@ -516,7 +513,7 @@ async function createVoiceChannel(
   interaction: ButtonInteraction | StringSelectMenuInteraction,
   lfg: LFGSchema,
   client: Client,
-  voiceCategoryId?: string
+  voiceCategoryId?: string,
 ) {
   if (!interaction.guild) return null;
 
@@ -532,13 +529,13 @@ async function createVoiceChannel(
           category = fetchedChannel;
         } else {
           console.warn(
-            `Configured voice category ID ${voiceCategoryId} is not a category channel.`
+            `Configured voice category ID ${voiceCategoryId} is not a category channel.`,
           );
         }
       } catch (fetchError) {
         console.error(
           `Could not fetch configured voice category ID ${voiceCategoryId}:`,
-          fetchError
+          fetchError,
         );
       }
     }
@@ -571,7 +568,7 @@ async function createVoiceChannel(
     console.log(
       `[LFG DEBUG] Created voice channel ${channel.name} (${
         channel.id
-      }) under category ${category?.name ?? "None"}`
+      }) under category ${category?.name ?? "None"}`,
     );
 
     const member = interaction.guild.members.cache.get(interaction.user.id);
@@ -579,12 +576,12 @@ async function createVoiceChannel(
       try {
         await member.voice.setChannel(channel);
         console.log(
-          `[LFG DEBUG] Moved user ${member.user.tag} to new VC ${channel.id}`
+          `[LFG DEBUG] Moved user ${member.user.tag} to new VC ${channel.id}`,
         );
       } catch (moveError) {
         console.error(
           `Could not move user ${member.user.tag} to voice channel ${channel.id}:`,
-          moveError
+          moveError,
         );
       }
     }
@@ -600,18 +597,18 @@ async function sendLFGAnnouncement(
   lfg: LFGSchema,
   client: Client,
   announcementChannelId: string,
-  pingRoleId?: string | null
+  pingRoleId?: string | null,
 ) {
   if (!interaction.guild) return;
 
   try {
     const channel = interaction.client.channels.cache.get(
-      announcementChannelId
+      announcementChannelId,
     );
 
     if (!channel || !channel.isTextBased()) {
       console.error(
-        `Configured announcement channel ${announcementChannelId} not found or not text-based.`
+        `Configured announcement channel ${announcementChannelId} not found or not text-based.`,
       );
       await interaction
         .followUp({
@@ -645,7 +642,7 @@ async function sendLFGAnnouncement(
             ? `<#${lfg.voiceChannelId}>`
             : "Not Created",
           inline: false,
-        }
+        },
       )
       .setFooter({ text: `Squad ID: ${lfg.id}` })
       .setTimestamp();
@@ -659,7 +656,7 @@ async function sendLFGAnnouncement(
       embeds: [embed],
     });
     console.log(
-      `[LFG DEBUG] Sent announcement for LFG ${lfg.id} to channel ${announcementChannel.id}`
+      `[LFG DEBUG] Sent announcement for LFG ${lfg.id} to channel ${announcementChannel.id}`,
     );
 
     const lfgService = LFGService.instance;
@@ -682,7 +679,7 @@ async function sendLFGAnnouncement(
 async function handleCloseConfirmLFG(
   interaction: ButtonInteraction,
   lfgId: string,
-  client: Client
+  client: Client,
 ) {
   if (!interaction.guildId || !interaction.guild) return;
 
@@ -721,15 +718,15 @@ async function handleCloseConfirmLFG(
     if (lfg.announcementChannelId && lfg.announcementMessageId) {
       try {
         const channel = interaction.client.channels.cache.get(
-          lfg.announcementChannelId
+          lfg.announcementChannelId,
         );
         if (channel?.isTextBased()) {
           const message = await channel.messages.fetch(
-            lfg.announcementMessageId
+            lfg.announcementMessageId,
           );
           if (message) {
             const config = await LFGService.instance.getGuildConfig(
-              interaction.guildId
+              interaction.guildId,
             );
             const pingRoleId = config?.pingRoleId;
             const originalContent = message.content;
@@ -750,7 +747,7 @@ async function handleCloseConfirmLFG(
               .setTitle(`CLOSED: ${lfg.map} (${lfg.difficulty})`)
               .setColor("#808080")
               .setDescription(
-                `This LFG request by <@${lfg.ownerId}> is now closed.`
+                `This LFG request by <@${lfg.ownerId}> is now closed.`,
               )
               .setFields([]);
 
@@ -760,14 +757,14 @@ async function handleCloseConfirmLFG(
               components: [],
             });
             console.log(
-              `[LFG DEBUG] Updated announcement to closed for LFG ${lfg.id}`
+              `[LFG DEBUG] Updated announcement to closed for LFG ${lfg.id}`,
             );
           }
         }
       } catch (error) {
         console.error(
           `[LFG Close] Error updating announcement for ${lfg.id}:`,
-          error
+          error,
         );
       }
     }
@@ -775,12 +772,12 @@ async function handleCloseConfirmLFG(
     if (lfg.voiceChannelId) {
       try {
         const channel = interaction.client.channels.cache.get(
-          lfg.voiceChannelId
+          lfg.voiceChannelId,
         );
         if (channel && channel.type === ChannelType.GuildVoice) {
           await channel.delete(`LFG request ${lfg.id} closed by owner`);
           console.log(
-            `[LFG DEBUG] Deleted voice channel ${lfg.voiceChannelId} for LFG ${lfg.id}`
+            `[LFG DEBUG] Deleted voice channel ${lfg.voiceChannelId} for LFG ${lfg.id}`,
           );
         }
       } catch (error) {
@@ -789,12 +786,12 @@ async function handleCloseConfirmLFG(
           error.code === RESTJSONErrorCodes.UnknownChannel
         ) {
           console.warn(
-            `[LFG Close] Voice channel ${lfg.voiceChannelId} for LFG ${lfg.id} already deleted.`
+            `[LFG Close] Voice channel ${lfg.voiceChannelId} for LFG ${lfg.id} already deleted.`,
           );
         } else {
           console.error(
             `[LFG Close] Error deleting voice channel ${lfg.voiceChannelId} for LFG ${lfg.id}:`,
-            error
+            error,
           );
         }
       }
@@ -807,55 +804,5 @@ async function handleCloseConfirmLFG(
     });
   } catch (error) {
     console.error(`Error closing LFG ${lfgId} via shortcut button:`, error);
-  }
-}
-
-async function handleCloseExistingLFG(
-  interaction: ButtonInteraction,
-  lfgId: string
-) {
-  const lfgService = LFGService.instance;
-  const lfg = await lfgService.getLFGById(lfgId);
-
-  if (!lfg) {
-    await interaction.update({
-      content: "This LFG request no longer exists.",
-      components: [],
-    });
-    return;
-  }
-
-  if (interaction.user.id !== lfg.ownerId) {
-    await interaction.reply({
-      content: "Only the owner can close this LFG.",
-      ephemeral: true,
-    });
-    return;
-  }
-
-  try {
-    await interaction.update({
-      content: "⏳ Closing your existing LFG request...",
-      components: [],
-    });
-    await lfgService.closeLFG(lfgId);
-
-    await interaction.followUp({
-      content:
-        "✅ Your existing LFG request has been marked as closed in the database. You can now create a new one using `/lfg create` again.\n*(Note: Use `/lfg close` for full cleanup of announcement and voice channel.)*",
-      ephemeral: true,
-    });
-  } catch (error) {
-    console.error(
-      `Error closing existing LFG ${lfgId} via shortcut button:`,
-      error
-    );
-    await interaction
-      .followUp({
-        content:
-          "❌ An error occurred while closing your existing LFG request.",
-        ephemeral: true,
-      })
-      .catch(console.error);
   }
 }
