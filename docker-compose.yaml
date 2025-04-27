@@ -1,17 +1,4 @@
 services:
-  df-lfg-bot:
-    image: harshnpatel/df-lfg-bot:latest
-    container_name: df-lfg-bot
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      MONGO_URI: mongodb://root:password@df-lfg-bot-Mongo:27017/DOWbot
-    depends_on:
-      - mongo
-    networks:
-      - df-lfg-bot-Network
-
   mongo:
     image: mongo:latest
     container_name: df-lfg-bot-Mongo
